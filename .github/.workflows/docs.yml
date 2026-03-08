@@ -1,0 +1,49 @@
+name: Publish documentation
+run-name: Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: publish-docs
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source (main)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+          fetch-depth: 0
+
+      - name: Copy generated site to gh-pages
+        run: |
+          cp README.md gh-pages/README.md
+
+      - name: Commit and push gh-pages
+        run: |
+          cd gh-pages
+          python3 main.py
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+
+          git add docs/
+          git diff --cached --quiet && exit 0
+
+          git commit -m "Update generated docs from ${GITHUB_SHA}"
+          git push origin gh-pages
