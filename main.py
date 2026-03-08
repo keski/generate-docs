@@ -1,4 +1,4 @@
-with open("index.html", "w") as out:
+with open("docs/index.html", "w") as out:
     with open("README.md") as _in:
         out.write(f"""<html>
 <body>
